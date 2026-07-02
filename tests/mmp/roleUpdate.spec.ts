@@ -1,0 +1,85 @@
+import { test, expect } from '@playwright/test';
+import { LoginPage } from '../../pages/mmp/LoginPage';
+import { roleCheckerComments } from '../../test-data/role.data';
+
+/**
+ * TC_ROLE_UPD_E2E_001 — Full Role Update & Approval Flow
+ * AdminMaker edits first role → AdminChecker approves it
+ */
+
+test('TC_ROLE_UPD_E2E_001 - Full role update and approval flow', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  const ts        = Date.now();
+  const updatedName        = `Auto_Role_Update_${ts}`;
+  const updatedDescription = `Updated role description at ${new Date(ts).toISOString()}`;
+
+  // ── PHASE 1: AdminMaker updates an existing role ─────────────────────────────
+
+  // Step 1: Login as AdminMaker
+  await loginPage.navigate();
+  await loginPage.loginAsAdminMaker();
+  await expect(page).not.toHaveURL(/\/login/);
+
+  // Step 2: Go to User & Role Management → Role List
+  await page.getByRole('button', { name: 'User & Role Management' }).click();
+  await page.getByRole('link', { name: 'Role List' }).click();
+
+  // Step 3: Click Edit on the first role in the list
+  await expect(page.getByRole('button', { name: 'Edit' }).first()).toBeVisible({ timeout: 15000 });
+  await page.getByRole('button', { name: 'Edit' }).first().click();
+
+  // Step 4: Assert Edit form is open
+  await expect(page.getByRole('textbox', { name: 'Enter role name' })).toBeVisible();
+
+  // Step 5: Update Role Name with unique value
+  await page.getByRole('textbox', { name: 'Enter role name' }).clear();
+  await page.getByRole('textbox', { name: 'Enter role name' }).fill(updatedName);
+
+  // Step 6: Update Role Description with unique value
+  await page.getByRole('textbox', { name: 'Enter role description' }).clear();
+  await page.getByRole('textbox', { name: 'Enter role description' }).fill(updatedDescription);
+
+  // Step 7: Click Update button (Edit Role page has 'Update' not 'Save')
+  await page.getByRole('button', { name: 'Update' }).click();
+
+  // Step 8: Assert success toast
+  await expect(page.getByText('Processed OK')).toBeVisible({ timeout: 15000 });
+  await page.getByRole('button', { name: 'Close toast' }).click();
+
+  // Step 9: Logout AdminMaker
+  await page.getByRole('button', { name: /a admin/i }).click();
+  await page.getByRole('banner').getByRole('button', { name: 'Logout' }).click();
+  await expect(page).toHaveURL(/\/login/);
+
+  // ── PHASE 2: AdminChecker approves the update ─────────────────────────────────
+
+  // Step 10: Login as AdminChecker
+  await loginPage.loginAsAdminChecker();
+  await expect(page).not.toHaveURL(/\/login/);
+
+  // Step 11: Go to Inbox → Pending Processes
+  await page.getByRole('button', { name: 'Inbox' }).click();
+  await page.getByRole('link', { name: 'Pending Processes' }).click();
+
+  // Step 12: Find ROLE UPDATE row
+  await expect(page.getByRole('cell', { name: 'ROLE UPDATE' }).first()).toBeVisible({ timeout: 15000 });
+  await page.getByRole('cell', { name: 'ROLE UPDATE' }).first().click();
+
+  // Step 13: Click Review
+  await page.getByRole('button', { name: 'Review' }).first().click();
+  await expect(page.getByRole('heading', { name: 'Review Role' })).toBeVisible();
+
+  // Step 14: Approve with comment
+  await page.getByRole('button', { name: 'Approve' }).click();
+  await page.getByRole('textbox', { name: 'Comments *' }).fill(roleCheckerComments.approve);
+  await page.getByRole('button', { name: 'Confirm' }).click();
+
+  // Step 15: Assert approval success
+  await expect(page.getByText('Process approved successfully')).toBeVisible({ timeout: 15000 });
+  await page.getByRole('button', { name: 'Close toast' }).click();
+
+  // Step 16: Logout AdminChecker
+  await page.getByRole('button', { name: /a admin/i }).click();
+  await page.getByRole('banner').getByRole('button', { name: 'Logout' }).click();
+  await expect(page).toHaveURL(/\/login/);
+});

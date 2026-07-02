@@ -1,0 +1,272 @@
+import ExcelJS from 'exceljs';
+import path from 'path';
+import fs from 'fs';
+
+interface RoleUpdateTestCase {
+  tcId: string;
+  module: string;
+  role: string;
+  testType: 'Positive' | 'Negative';
+  description: string;
+  preconditions: string;
+  testData: string;
+  testSteps: string;
+  expectedResult: string;
+  status: 'PASS' | 'FAIL' | 'N/A';
+}
+
+const testCases: RoleUpdateTestCase[] = [
+
+  // ── POSITIVE ──────────────────────────────────────────────────────────────────
+
+  {
+    tcId: 'TC_ROLE_UPD_E2E_001',
+    module: 'Role Update & Approval',
+    role: 'AdminMaker → AdminChecker',
+    testType: 'Positive',
+    description: 'Full end-to-end role update and approval flow',
+    preconditions: 'At least one role exists in Role List. AdminMaker & AdminChecker accounts are active.',
+    testData:
+      'Updated Name: Auto_Role_Update_<timestamp>\nUpdated Description: Updated role description at <timestamp>\nApproval Comment: Approved by AdminChecker - Automation Test',
+    testSteps:
+      '1. Navigate to /login\n2. Login as AdminMaker\n3. Go to User & Role Management → Role List\n4. Click Edit on the first role\n5. Clear Role Name and fill with unique updated name\n6. Clear Role Description and fill with unique updated description\n7. Click Save\n8. Verify "Processed OK" toast appears\n9. Close toast and Logout\n10. Login as AdminChecker\n11. Go to Inbox → Pending Processes\n12. Click ROLE UPDATE row\n13. Click Review\n14. Verify "Review Role" heading is visible\n15. Click Approve\n16. Enter approval comment\n17. Click Confirm\n18. Verify "Process approved successfully" toast\n19. Close toast and Logout',
+    expectedResult:
+      'Role updated with "Processed OK" toast.\nAdminChecker sees it in Pending Processes as ROLE UPDATE.\nApproval succeeds with "Process approved successfully" toast.\nBoth users logged out.',
+    status: 'N/A',
+  },
+
+  // ── NEGATIVE — MAKER FORM VALIDATION ─────────────────────────────────────────
+
+  {
+    tcId: 'TC_ROLE_UPD_NEG_001',
+    module: 'Role Update',
+    role: 'AdminMaker',
+    testType: 'Negative',
+    description: 'Clear Role Name — shows "Name must be at least 4 characters"',
+    preconditions: 'AdminMaker logged in. Edit Role form is open.',
+    testData: 'Role Name: (cleared)',
+    testSteps:
+      '1. Login as AdminMaker\n2. Go to User & Role Management → Role List\n3. Click Edit on the first role\n4. Clear the Role Name field\n5. Click Save\n6. Assert "Name must be at least 4 characters" is visible\n7. Assert "Processed OK" is NOT visible',
+    expectedResult: '"Name must be at least 4 characters" error shown. No update submitted.',
+    status: 'N/A',
+  },
+  {
+    tcId: 'TC_ROLE_UPD_NEG_002',
+    module: 'Role Update',
+    role: 'AdminMaker',
+    testType: 'Negative',
+    description: 'Role Name too short (< 4 chars) — shows "Name must be at least 4 characters"',
+    preconditions: 'AdminMaker logged in. Edit Role form is open.',
+    testData: 'Role Name: abc (3 chars)',
+    testSteps:
+      '1. Login as AdminMaker\n2. Click Edit on the first role\n3. Clear Role Name and type "abc"\n4. Click Save\n5. Assert "Name must be at least 4 characters" is visible\n6. Assert "Processed OK" is NOT visible',
+    expectedResult: '"Name must be at least 4 characters" error shown. No update submitted.',
+    status: 'N/A',
+  },
+  {
+    tcId: 'TC_ROLE_UPD_NEG_003',
+    module: 'Role Update',
+    role: 'AdminMaker',
+    testType: 'Negative',
+    description: 'Role Name too long (> 70 chars) — max length enforcement',
+    preconditions: 'AdminMaker logged in. Edit Role form is open.',
+    testData: 'Role Name: 71 × "A"',
+    testSteps:
+      '1. Login as AdminMaker\n2. Click Edit on the first role\n3. Clear Role Name and type 71 "A" characters\n4. Press Tab to trigger validation\n5. If field accepts >70 chars: assert "Name cannot exceed 70 characters"\n6. If field silently capped: assert input length ≤ 70\n7. Assert "Processed OK" is NOT visible',
+    expectedResult: 'Field either caps input at 70 chars silently or shows "Name cannot exceed 70 characters".',
+    status: 'N/A',
+  },
+  {
+    tcId: 'TC_ROLE_UPD_NEG_004',
+    module: 'Role Update',
+    role: 'AdminMaker',
+    testType: 'Negative',
+    description: 'Clear Description — shows "Description must be at least 4 characters"',
+    preconditions: 'AdminMaker logged in. Edit Role form is open.',
+    testData: 'Description: (cleared)',
+    testSteps:
+      '1. Login as AdminMaker\n2. Click Edit on the first role\n3. Clear the Role Description field\n4. Click Save\n5. Assert "Description must be at least 4 characters" is visible\n6. Assert "Processed OK" is NOT visible',
+    expectedResult: '"Description must be at least 4 characters" error shown. No update submitted.',
+    status: 'N/A',
+  },
+  {
+    tcId: 'TC_ROLE_UPD_NEG_005',
+    module: 'Role Update',
+    role: 'AdminMaker',
+    testType: 'Negative',
+    description: 'Description too short (< 4 chars) — shows "Description must be at least 4 characters"',
+    preconditions: 'AdminMaker logged in. Edit Role form is open.',
+    testData: 'Description: abc (3 chars)',
+    testSteps:
+      '1. Login as AdminMaker\n2. Click Edit on the first role\n3. Clear Description and type "abc"\n4. Click Save\n5. Assert "Description must be at least 4 characters" is visible\n6. Assert "Processed OK" is NOT visible',
+    expectedResult: '"Description must be at least 4 characters" error shown. No update submitted.',
+    status: 'N/A',
+  },
+
+  // ── NEGATIVE — CHECKER VALIDATION ────────────────────────────────────────────
+
+  {
+    tcId: 'TC_ROLE_UPD_NEG_006',
+    module: 'Role Update Approval',
+    role: 'AdminChecker',
+    testType: 'Negative',
+    description: 'Checker cannot Approve role update without a comment — Confirm is disabled',
+    preconditions: 'A pending ROLE UPDATE exists in Pending Processes.',
+    testData: 'Comment: (empty)',
+    testSteps:
+      '1. AdminMaker submits a role update\n2. Login as AdminChecker\n3. Go to Inbox → Pending Processes\n4. Click ROLE UPDATE row\n5. Click Review\n6. Click Approve\n7. Leave Comments field empty\n8. Assert Confirm button is disabled\n9. Assert "Process approved successfully" is NOT visible',
+    expectedResult: 'Confirm button is disabled when comment is empty. Approval cannot proceed.',
+    status: 'N/A',
+  },
+  {
+    tcId: 'TC_ROLE_UPD_NEG_007',
+    module: 'Role Update Approval',
+    role: 'AdminChecker',
+    testType: 'Negative',
+    description: 'Checker cannot Reject role update without a comment — Confirm is disabled',
+    preconditions: 'A pending ROLE UPDATE exists in Pending Processes.',
+    testData: 'Comment: (empty)',
+    testSteps:
+      '1. AdminMaker submits a role update\n2. Login as AdminChecker\n3. Go to Inbox → Pending Processes\n4. Click ROLE UPDATE row\n5. Click Review\n6. Click Reject\n7. Leave Comments field empty\n8. Assert Confirm button is disabled\n9. Assert "Process rejected" is NOT visible',
+    expectedResult: 'Confirm button is disabled when comment is empty. Rejection cannot proceed.',
+    status: 'N/A',
+  },
+  {
+    tcId: 'TC_ROLE_UPD_NEG_008',
+    module: 'Role Update Approval',
+    role: 'AdminChecker',
+    testType: 'Negative',
+    description: 'Checker rejects role update with a valid reason',
+    preconditions: 'A pending ROLE UPDATE exists in Pending Processes.',
+    testData: 'Comment: Rejected by AdminChecker - Automation Test: Invalid role details',
+    testSteps:
+      '1. AdminMaker submits a role update\n2. Login as AdminChecker\n3. Go to Inbox → Pending Processes\n4. Click ROLE UPDATE row\n5. Click Review\n6. Click Reject\n7. Enter rejection comment\n8. Click Confirm\n9. Assert "Process rejected" toast appears\n10. Close toast and Logout',
+    expectedResult: 'Role update is rejected. "Process rejected" toast appears. Request removed from Pending Processes.',
+    status: 'N/A',
+  },
+];
+
+// ── Excel generation ──────────────────────────────────────────────────────────
+
+async function generateRoleUpdateReport() {
+  const reportsDir = path.resolve('reports');
+  if (!fs.existsSync(reportsDir)) fs.mkdirSync(reportsDir, { recursive: true });
+
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'AXIAN Automation';
+  workbook.created = new Date();
+
+  // ── Sheet 1: All Test Cases ──────────────────────────────────────────────────
+  const sheet = workbook.addWorksheet('Role Update Tests');
+
+  sheet.columns = [
+    { header: 'TC ID',           key: 'tcId',           width: 22 },
+    { header: 'Module',          key: 'module',         width: 30 },
+    { header: 'Role',            key: 'role',           width: 28 },
+    { header: 'Test Type',       key: 'testType',       width: 13 },
+    { header: 'Description',     key: 'description',    width: 52 },
+    { header: 'Pre-conditions',  key: 'preconditions',  width: 45 },
+    { header: 'Test Data',       key: 'testData',       width: 42 },
+    { header: 'Test Steps',      key: 'testSteps',      width: 65 },
+    { header: 'Expected Result', key: 'expectedResult', width: 50 },
+    { header: 'Status',          key: 'status',         width: 12 },
+  ];
+
+  const headerRow = sheet.getRow(1);
+  headerRow.height = 22;
+  headerRow.eachCell(cell => {
+    cell.font      = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+    cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E4057' } };
+    cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+    cell.border    = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+  });
+
+  testCases.forEach((tc, idx) => {
+    const row = sheet.addRow(tc);
+    row.height = 100;
+
+    row.eachCell(cell => {
+      cell.alignment = { wrapText: true, vertical: 'top', horizontal: 'left' };
+      cell.border    = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+      if (idx % 2 === 1) {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F5F5' } };
+      }
+    });
+
+    row.getCell('tcId').font = { bold: true };
+
+    const typeCell = row.getCell('testType');
+    typeCell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+    if (tc.testType === 'Positive') {
+      typeCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9EAD3' } };
+      typeCell.font = { color: { argb: 'FF274E13' }, bold: true };
+    } else {
+      typeCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF2CC' } };
+      typeCell.font = { color: { argb: 'FF7F6000' }, bold: true };
+    }
+
+    const statusCell = row.getCell('status');
+    statusCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    if (tc.status === 'PASS') {
+      statusCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF92D050' } };
+      statusCell.font = { bold: true, color: { argb: 'FF1A3A00' } };
+    } else if (tc.status === 'FAIL') {
+      statusCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF4C4C' } };
+      statusCell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    } else {
+      statusCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } };
+      statusCell.font = { bold: true, color: { argb: 'FF666666' } };
+    }
+  });
+
+  // ── Sheet 2: Summary ─────────────────────────────────────────────────────────
+  const summary = workbook.addWorksheet('Summary');
+  summary.columns = [
+    { header: 'Metric', key: 'metric', width: 28 },
+    { header: 'Value',  key: 'value',  width: 15 },
+  ];
+
+  const sumHeader = summary.getRow(1);
+  sumHeader.eachCell(cell => {
+    cell.font      = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2E4057' } };
+    cell.alignment = { horizontal: 'center' };
+  });
+
+  const total   = testCases.length;
+  const passed  = testCases.filter(t => t.status === 'PASS').length;
+  const failed  = testCases.filter(t => t.status === 'FAIL').length;
+  const pending = testCases.filter(t => t.status === 'N/A').length;
+  const pos     = testCases.filter(t => t.testType === 'Positive').length;
+  const neg     = testCases.filter(t => t.testType === 'Negative').length;
+
+  [
+    { metric: 'Module',            value: 'Role Update' },
+    { metric: 'Execution Date',    value: new Date().toLocaleDateString() },
+    { metric: 'Total Test Cases',  value: total },
+    { metric: 'Passed',            value: passed },
+    { metric: 'Failed',            value: failed },
+    { metric: 'Not Yet Run (N/A)', value: pending },
+    { metric: 'Pass Rate',         value: passed > 0 ? `${((passed / (total - pending)) * 100).toFixed(1)}%` : '0%' },
+    { metric: 'Positive Tests',    value: pos },
+    { metric: 'Negative Tests',    value: neg },
+  ].forEach(d => {
+    const r = summary.addRow(d);
+    r.eachCell(cell => {
+      cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+    });
+    if (d.metric === 'Passed')    r.getCell('value').font = { bold: true, color: { argb: 'FF274E13' } };
+    if (d.metric === 'Failed')    r.getCell('value').font = { bold: true, color: { argb: 'FFCC0000' } };
+    if (d.metric === 'Pass Rate') r.getCell('value').font = { bold: true };
+  });
+
+  const timestamp = new Date().toISOString().replace(/[T:.]/g, '-').slice(0, 19);
+  const filePath  = path.join(reportsDir, `Role_Update_Report_${timestamp}.xlsx`);
+  await workbook.xlsx.writeFile(filePath);
+  console.log(`\n✅ Excel report saved: ${filePath}`);
+}
+
+generateRoleUpdateReport().catch(err => {
+  console.error('Failed to generate report:', err);
+  process.exit(1);
+});

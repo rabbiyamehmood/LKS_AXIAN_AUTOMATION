@@ -1,0 +1,181 @@
+TC ID,Module,Sub-Module,Test Type,Description,Preconditions,Test Data,Validation Reason,Test Steps,Expected Result,Actual Result,Status,Remarks
+TC_RPT_001,Reports,Audit Logs,Positive,Audit Logs Report generates successfully with filters,"Jasper session active, MMP logged in as AdminMaker","Start Date: June 1 2026, End Date: June 10 2026, Status: Success, Username: AdminMaker, Action Type: ALL",Verify audit logs report displays correctly with all filters applied,"1. Login to MMP Portal as AdminMaker
+2. Navigate to Reports section
+3. Click on 'Audit Logs' button
+4. Fill in Report Parameters:
+   - Start Date: June 1, 2026
+   - End Date: June 10, 2026
+   - Status: Success
+   - Username: AdminMaker
+   - Action Type: ALL
+5. Click Submit button
+6. Verify Results section appears
+7. Assert 'Showing 1-20 of 297 records' text visible
+8. Assert 'Date Time' column header visible
+9. Assert 'Jun 2026, 15:00' timestamp visible
+10. Assert 'Username' column header visible
+11. Assert 'AdminMaker' username in first cell
+12. Click XLSX export button","Report loads with correct filters. Results section displays with records. Date Time column shows timestamps. Username column shows AdminMaker entries. XLSX export button works.",All assertions passed.,PASS,
+TC_RPT_002,Reports,Transaction Detail,Positive,Transaction Detail Report generates with MID and filters,"Jasper session active, MID 000921773937631 exists","From Date: June 1 2026, To Date: June 11 2026, Source MID: 000921773937631, Aggregator: All, Status: All, Transaction Category: All, Channel: Merchant Portal, Entity MSISDN: 25570000082",Verify transaction detail report with MID and all filter combinations,"1. Login to MMP Portal as AdminMaker
+2. Navigate to Reports section
+3. Click 'Transaction Detail' button
+4. Fill Report Parameters:
+   - From Date: June 1, 2026
+   - To Date: June 11, 2026
+   - Source MID: 000921773937631
+   - Aggregator: All
+   - Status: All
+   - Transaction Category: All
+   - Channel: Merchant Portal
+   - Entity MSISDN: 25570000082
+5. Click Submit button
+6. Verify Results section displays
+7. Assert report title 'Merchant Transaction Report' visible
+8. Assert columns: MID, Aggregator, Category, Status visible
+9. Assert MID 000921773937631 in results
+10. Click XLSX export button","Report loads with correct filters. All columns visible. MID data present in results. Report title matches. XLSX export works.",All assertions passed.,PASS,
+TC_RPT_003,Reports,Transaction Summary,Positive,Transaction Summary Report generates with merchant and aggregator filters,"Jasper session active, Merchant 'Touseefullah' exists","From Date: June 1 2026, To Date: June 11 2026, Merchant Name: Touseefullah, Aggregator: All",Verify transaction summary report with merchant name and aggregator filters,"1. Login to MMP Portal as AdminMaker
+2. Navigate to Reports section
+3. Click 'Transaction Summary' button
+4. Fill Report Parameters:
+   - From Date: June 1, 2026
+   - To Date: June 11, 2026
+   - Merchant Name: Touseefullah
+   - Aggregator: All
+5. Click Submit button
+6. Assert 'Results' heading visible
+7. Assert report title 'Merchant Transaction Summary' visible
+8. Assert merchant name 'Touseefullah' in results
+9. Assert aggregator column visible
+10. Assert date range applied correctly
+11. Click XLSX export button","Report generates successfully. Results heading visible. Report title correct. Merchant data displayed. Date filters applied. XLSX export works.",All assertions passed.,PASS,
+TC_RPT_004,Reports,Merchant Onboard,Positive,Merchant Onboard Report generates with merchant name and status filters,"Jasper session active, Merchants exist in system","From Date: June 1 2026, To Date: June 11 2026, Merchant Name: xysjdjd, Aggregator: All, Status: Active, Onboarding Channel: Backoffice, Entity MSISDN: 25500000082",Verify merchant onboarding report with all filter combinations,"1. Login to MMP Portal as AdminMaker
+2. Navigate to Reports section
+3. Click 'Merchant Onboard' button
+4. Fill Report Parameters:
+   - From Date: June 1, 2026
+   - To Date: June 11, 2026
+   - Merchant Name: xysjdjd
+   - Aggregator: All
+   - Status: Active
+   - Onboarding Channel: Backoffice
+   - Entity MSISDN: 25500000082
+5. Click Submit button
+6. Assert Results section visible
+7. Assert report title 'Merchant Onboarding Report' visible
+8. Assert merchant name 'xysjdjd' in results
+9. Assert Status column shows 'Active'
+10. Assert Onboarding Channel shows 'Backoffice'
+11. Assert Entity MSISDN displayed correctly
+12. Click XLSX export button","Report loads with filters. Results displayed. Merchant name visible. Status shows Active. Onboarding channel correct. MSISDN data present. XLSX export works.",All assertions passed.,PASS,
+TC_RPT_005,Reports,Merchant Pending/Rejected,Positive,Pending Payments Report generates and can toggle between Pending and Rejected status,"Jasper session active, Pending/Rejected merchants exist","From Date: May 31 2026, To Date: June 11 2026, Status: Pending then Rejected",Verify pending/rejected merchant report can filter by different statuses,"1. Login to MMP Portal as AdminMaker
+2. Navigate to Reports section
+3. Click 'Merchant Pending/Rejected' button
+4. Fill Report Parameters:
+   - From Date: May 31, 2026
+   - To Date: June 11, 2026
+   - Status: All then select Pending
+5. Click Submit button
+6. Assert 'Showing 1-7 of 7 records' text visible
+7. Assert Results section displays pending merchants
+8. Change Status filter to 'Rejected'
+9. Click Submit button again
+10. Assert Results section displays rejected merchants
+11. Assert status column shows 'Rejected'
+12. Click XLSX export button","Report loads for Pending status. Record count visible (1-7 of 7). Status filter toggles correctly. Rejected status displays rejected merchants. XLSX export works.",All assertions passed.,PASS,
+TC_RPT_006,Reports,Merchant Status Analysis,Positive,Merchant Status Analysis Report generates and can toggle between Pending and Success statuses,"Jasper session active, Merchant 'Touseefullah' with different statuses exists","Status: Pending/Success, From Date: June 1 2026, To Date: June 11 2026, Merchant Name: Touseefullah, Aggregator: All, Entity MSISDN: 25500000087",Verify merchant status analysis report with multiple status filters and merchant filters,"1. Login to MMP Portal as AdminMaker
+2. Navigate to Reports section
+3. Click 'Merchant Status Analysis' button
+4. Assert 'Report Parameters' heading visible
+5. Fill Report Parameters:
+   - Status: Pending
+   - From Date: June 1, 2026
+   - To Date: June 11, 2026
+   - Merchant Name: Touseefullah
+   - Aggregator: All
+   - Entity MSISDN: 25500000087
+6. Click Submit button
+7. Assert Results section displays
+8. Click XLSX export button
+9. Change Status to 'Success'
+10. Click Submit button again
+11. Assert Results refresh with Success status
+12. Assert status column shows 'Success'","Report generates with Pending status. Merchant filter works. Results display correctly. XLSX export works. Status toggles to Success. Results refresh properly.",All assertions passed.,PASS,
+TC_RPT_NEG_001,Reports,Audit Logs,Negative,Audit Logs Report fails without mandatory date fields,"MMP logged in as AdminMaker",No date range provided,Verify mandatory field validation for date fields,"1. Login to MMP Portal as AdminMaker
+2. Navigate to Reports section
+3. Click 'Audit Logs' button
+4. Leave Start Date empty
+5. Leave End Date empty
+6. Click Submit button without filling dates
+7. Assert error message 'Please fill mandatory fields' or similar appears
+8. Assert report does not generate
+9. Assert Results section does not appear","Validation error displayed. Report does not generate. Mandatory field error shown for date fields.",,EXPECTED,Validation should prevent submission
+TC_RPT_NEG_002,Reports,Transaction Detail,Negative,Transaction Detail Report with invalid MID format (special characters),"MMP logged in as AdminMaker","From Date: June 1 2026, To Date: June 11 2026, Source MID: @#$%^&*, Other fields: valid",Verify MID field validation rejects special characters,"1. Login to MMP Portal as AdminMaker
+2. Navigate to Reports section
+3. Click 'Transaction Detail' button
+4. Fill valid date range
+5. Enter Source MID: @#$%^&*
+6. Fill other fields with valid data
+7. Click Submit button
+8. Assert validation error for MID field
+9. Assert error message 'Invalid MID format' or similar
+10. Assert report does not generate","Validation error for MID field. Invalid format error message displayed. Report does not generate.",,EXPECTED,MID should accept only alphanumeric
+TC_RPT_NEG_003,Reports,Transaction Summary,Negative,Transaction Summary Report fails when FROM date is greater than TO date,"MMP logged in as AdminMaker","From Date: June 11 2026, To Date: June 1 2026 (invalid range), Other fields: valid",Verify date range validation prevents invalid date range,"1. Login to MMP Portal as AdminMaker
+2. Navigate to Reports section
+3. Click 'Transaction Summary' button
+4. Set From Date: June 11, 2026 (later date)
+5. Set To Date: June 1, 2026 (earlier date)
+6. Fill other fields with valid data
+7. Click Submit button
+8. Assert validation error 'FROM date cannot be greater than TO date'
+9. Assert report does not generate
+10. Assert Results section does not appear","Date validation error displayed. Error message about invalid date range shown. Report does not generate.",,EXPECTED,Date range validation required
+TC_RPT_NEG_004,Reports,Merchant Onboard,Negative,Merchant Onboard Report with non-existent merchant name,"MMP logged in as AdminMaker","From Date: June 1 2026, To Date: June 11 2026, Merchant Name: NonExistentMerchant999, Other fields: valid",Verify report handles non-existent merchant gracefully,"1. Login to MMP Portal as AdminMaker
+2. Navigate to Reports section
+3. Click 'Merchant Onboard' button
+4. Fill valid date range
+5. Enter Merchant Name: NonExistentMerchant999
+6. Fill other fields with valid data
+7. Click Submit button
+8. Assert Results section displays
+9. Assert 'No records found' or 'Showing 0-0 of 0 records' message
+10. Assert no data rows in results table","Report generates successfully. No records found message displayed. Empty results table shown. No error thrown.",,EXPECTED,Should handle gracefully with empty results
+TC_RPT_NEG_005,Reports,Merchant Pending/Rejected,Negative,Pending/Rejected Report with future date range,"MMP logged in as AdminMaker","From Date: June 1 2027, To Date: June 11 2027 (future dates)",Verify report handles future dates appropriately,"1. Login to MMP Portal as AdminMaker
+2. Navigate to Reports section
+3. Click 'Merchant Pending/Rejected' button
+4. Set From Date: June 1, 2027 (future)
+5. Set To Date: June 11, 2027 (future)
+6. Select Status: All
+7. Click Submit button
+8. Assert validation error 'Cannot select future dates' or report generates with no records
+9. Assert appropriate message displayed","Either validation error for future dates OR report generates with no records and 'No records found' message.",,EXPECTED,Future date handling varies by requirement
+TC_RPT_NEG_006,Reports,Merchant Status Analysis,Negative,Status Analysis Report without selecting mandatory Status field,"MMP logged in as AdminMaker","Date range: valid, Status: not selected, Other fields: valid",Verify mandatory Status field validation,"1. Login to MMP Portal as AdminMaker
+2. Navigate to Reports section
+3. Click 'Merchant Status Analysis' button
+4. Fill valid date range
+5. Leave Status field unselected (mandatory)
+6. Fill other fields with valid data
+7. Click Submit button
+8. Assert validation error 'Status is mandatory'
+9. Assert report does not generate
+10. Assert Results section does not appear","Validation error for mandatory Status field. Error message displayed. Report does not generate.",,EXPECTED,Status is mandatory field
+TC_RPT_NEG_007,Reports,Transaction Detail,Negative,Transaction Detail with invalid Entity MSISDN format,"MMP logged in as AdminMaker","Valid date range, Entity MSISDN: abc123xyz (invalid format), Other fields: valid",Verify MSISDN field format validation,"1. Login to MMP Portal as AdminMaker
+2. Navigate to Reports section
+3. Click 'Transaction Detail' button
+4. Fill valid date range and MID
+5. Enter Entity MSISDN: abc123xyz (invalid)
+6. Fill other fields with valid data
+7. Click Submit button
+8. Assert validation error 'Invalid MSISDN format'
+9. Assert report does not generate","MSISDN format validation error. Error message about invalid format. Report does not generate.",,EXPECTED,MSISDN should be numeric only
+TC_RPT_NEG_008,Reports,Audit Logs,Negative,Audit Logs with non-existent username filter,"MMP logged in as AdminMaker","Date range: valid, Username: NonExistentUser999, Other fields: valid",Verify report handles non-existent username gracefully,"1. Login to MMP Portal as AdminMaker
+2. Navigate to Reports section
+3. Click 'Audit Logs' button
+4. Fill valid date range
+5. Enter Username: NonExistentUser999
+6. Select Status: Success
+7. Select Action Type: ALL
+8. Click Submit button
+9. Assert Results section displays
+10. Assert 'Showing 0-0 of 0 records' or 'No records found'
+11. Assert empty results table","Report generates successfully. No records found message. Empty results table. No error thrown.",,EXPECTED,Should handle gracefully with empty results
