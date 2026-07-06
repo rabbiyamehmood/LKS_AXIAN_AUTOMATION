@@ -1,4 +1,4 @@
-# AXIAN Automation Testing Framework - Flow Diagram
+# LKS AXIAN Automation Testing Framework - Test Flow Diagram
 
 ## 🎯 Overall Test Execution Flow
 
@@ -10,94 +10,229 @@ flowchart TD
     D --> E[Load Test Data]
     E --> F{Select Test Suite}
     
-    F --> G[Login Tests]
-    F --> H[Aggregator Tests]
-    F --> I[Role Management Tests]
-    F --> J[Configuration Tests]
-    F --> K[Bulk Onboarding Tests]
-    F --> L[Reports Tests]
-    F --> M[Change Password Tests]
+    F --> G[Authentication Tests]
+    F --> H[Payment Tests]
+    F --> I[Profile Management Tests]
+    F --> J[Merchant Portal Tests]
     
-    G --> N[Execute Tests]
-    H --> N
-    I --> N
-    J --> N
-    K --> N
-    L --> N
-    M --> N
+    G --> K{Login Status}
+    K -->|Success| K1[Proceed to Payments]
+    K -->|Failed| K2[Verify Error Handling]
     
-    N --> O[Capture Results]
-    O --> P[Generate Artifacts]
-    P --> Q[Generate Reports]
-    Q --> R[Cleanup]
+    H --> L[Execute Payment Flows]
+    I --> M[Execute Profile Updates]
+    J --> N[Execute Merchant Tests]
+    
+    K1 --> O[Execute Tests]
+    K2 --> O
+    L --> O
+    M --> O
+    N --> O
+    
+    O --> P[Capture Results & Screenshots]
+    P --> Q[Generate HTML Report]
+    Q --> R[Cleanup & Close Browsers]
     R --> S[End Test Execution]
 ```
 
-## 🔐 Login Flow
+## 🔐 Login & Authentication Flow
 
 ```mermaid
 sequenceDiagram
-    participant T as Test Runner
-    participant P as Playwright Browser
-    participant S as MMP Server
+    participant Test as Test Runner
+    participant Browser as Playwright Browser
+    participant Server as LKS Server
     
-    T->>P: Navigate to MMP Login Page
-    P->>S: GET /login
-    S-->>P: Login Page HTML
-    P-->>T: Page Loaded
+    Test->>Browser: Navigate to Login Page
+    Browser->>Server: GET /login
+    Server-->>Browser: Login Page HTML
+    Browser-->>Test: Page Loaded
     
-    T->>P: Enter Username
-    T->>P: Enter Password
-    T->>P: Click Login Button
+    Test->>Browser: Enter Email/Username
+    Test->>Browser: Enter Password
+    Test->>Browser: Click Login Button
     
-    P->>S: POST /login (credentials)
-    S-->>P: Authentication Response
+    Browser->>Server: POST /api/login (credentials)
+    Server-->>Browser: Authentication Response
     
-    alt Successful Login
-        P-->>T: Dashboard Page Loaded
-        T->>T: Verify Dashboard Elements
-        T->>T: Store Session Cookies
-    else Failed Login
-        P-->>T: Error Message Displayed
-        T->>T: Verify Error Message
+    alt Login Successful
+        Browser-->>Test: Dashboard Redirected
+        Test->>Test: Verify Dashboard Elements
+        Test->>Test: Store Authentication Token
+    else Login Failed
+        Browser-->>Test: Error Message Displayed
+        Test->>Test: Verify Error Message
+        Test->>Test: Verify Retry Option
     end
 ```
 
-## 👥 User Role-Based Test Flow
+## 💳 Payment Processing Flow
 
 ```mermaid
 graph TB
-    subgraph "Admin Maker Workflow"
-        AM1[Login as Admin Maker] --> AM2[Navigate to Admin Panel]
-        AM2 --> AM3[Create New Aggregator]
-        AM3 --> AM4[Fill Aggregator Details]
-        AM4 --> AM5[Submit for Approval]
-        AM5 --> AM6[Verify Pending Status]
-        
-        AM2 --> AM7[Create New Role]
-        AM7 --> AM8[Define Role Permissions]
-        AM8 --> AM9[Submit Role for Approval]
-        
-        AM2 --> AM10[Configure System Settings]
-        AM10 --> AM11[Save Configuration]
-        
-        AM2 --> AM12[Initiate Bulk Onboarding]
-        AM12 --> AM13[Upload Excel File]
-        AM13 --> AM14[Validate Data]
-        AM14 --> AM15[Submit for Processing]
+    subgraph "Bank Transfer"
+        BT1[User Login] --> BT2[Navigate to Send Money]
+        BT2 --> BT3[Select Bank Transfer]
+        BT3 --> BT4[Fill Bank Details]
+        BT4 --> BT5[Enter Amount]
+        BT5 --> BT6[Review Transfer Details]
+        BT6 --> BT7[Confirm Transaction]
+        BT7 --> BT8{Success?}
+        BT8 -->|Yes| BT9[Verify Success Message]
+        BT8 -->|No| BT10[Verify Error Handling]
     end
     
-    subgraph "Admin Checker Workflow"
-        AC1[Login as Admin Checker] --> AC2[Review Pending Requests]
-        AC2 --> AC3{Approve/Reject?}
-        AC3 -->|Approve| AC4[Approve Request]
-        AC3 -->|Reject| AC5[Reject with Comments]
-        AC4 --> AC6[Verify Approval Status]
-        AC5 --> AC7[Verify Rejection Status]
+    subgraph "Bill Payment"
+        BP1[User Login] --> BP2[Navigate to Bill Payment]
+        BP2 --> BP3[Select Biller]
+        BP3 --> BP4[Select Bill Type]
+        BP4 --> BP5[Enter Bill Number]
+        BP5 --> BP6[Enter Amount]
+        BP6 --> BP7[Review Payment Details]
+        BP7 --> BP8[Confirm Payment]
+        BP8 --> BP9{Success?}
+        BP9 -->|Yes| BP10[Verify Receipt]
+        BP9 -->|No| BP11[Verify Error Message]
     end
     
-    subgraph "Labesh Maker Workflow"
-        LM1[Login as Labesh Maker] --> LM2[Access Labesh Module]
+    subgraph "Cash Out"
+        CO1[User Login] --> CO2[Navigate to Cashout]
+        CO2 --> CO3[Select Cash Out Option]
+        CO3 --> CO4[Enter Amount]
+        CO4 --> CO5[Review Charges]
+        CO5 --> CO6[Confirm Cashout]
+        CO6 --> CO7{Success?}
+        CO7 -->|Yes| CO8[Verify Confirmation]
+        CO7 -->|No| CO9[Verify Error Handling]
+    end
+    
+    subgraph "Send Money"
+        SM1[User Login] --> SM2[Navigate to Send Money]
+        SM2 --> SM3[Select Recipient]
+        SM3 --> SM4[Enter Amount]
+        SM4 --> SM5[Review Transfer Details]
+        SM5 --> SM6[Confirm Transfer]
+        SM6 --> SM7{Success?}
+        SM7 -->|Yes| SM8[Verify Transaction ID]
+        SM7 -->|No| SM9[Verify Error Message]
+    end
+    
+    subgraph "Scheduled Payments"
+        SP1[User Login] --> SP2[Navigate to Schedule Payment]
+        SP2 --> SP3{Payment Type?}
+        SP3 -->|Wallet to Bank| SP4[Select Bank Account]
+        SP3 -->|Wallet to Wallet| SP5[Select Recipient]
+        SP4 --> SP6[Enter Amount & Date]
+        SP5 --> SP6
+        SP6 --> SP7[Review Schedule Details]
+        SP7 --> SP8[Confirm Schedule]
+        SP8 --> SP9{Success?}
+        SP9 -->|Yes| SP10[Verify Schedule Created]
+        SP9 -->|No| SP11[Verify Error Handling]
+    end
+```
+
+## 👤 Profile Management Flow
+
+```mermaid
+graph TB
+    subgraph "Change MPIN"
+        CP1[User Login] --> CP2[Navigate to Profile Settings]
+        CP2 --> CP3[Select Change MPIN]
+        CP3 --> CP4[Enter Current MPIN]
+        CP4 --> CP5[Enter New MPIN]
+        CP5 --> CP6[Confirm New MPIN]
+        CP6 --> CP7{Validation}
+        CP7 -->|Pass| CP8[Confirm Change]
+        CP7 -->|Fail| CP9[Show Error Message]
+        CP8 --> CP10[Verify Success Message]
+        CP9 --> CP11[Verify Error Details]
+    end
+    
+    subgraph "Change Password"
+        PW1[User Login] --> PW2[Navigate to Profile Settings]
+        PW2 --> PW3[Select Change Password]
+        PW3 --> PW4[Enter Current Password]
+        PW4 --> PW5[Enter New Password]
+        PW5 --> PW6[Confirm New Password]
+        PW6 --> PW7{Validation}
+        PW7 -->|Pass| PW8[Confirm Change]
+        PW7 -->|Fail| PW9[Show Error Message]
+        PW8 --> PW10[Verify Success Message]
+        PW9 --> PW11[Verify Error Details]
+    end
+```
+
+## 🏪 Merchant Portal Flow
+
+```mermaid
+sequenceDiagram
+    participant Test as Test Runner
+    participant Browser as Playwright Browser
+    participant MerchantPortal as Merchant Portal Server
+    
+    Test->>Browser: Navigate to Merchant Portal
+    Browser->>MerchantPortal: GET /merchant
+    MerchantPortal-->>Browser: Portal Page
+    Browser-->>Test: Page Loaded
+    
+    Test->>Browser: Enter Merchant Credentials
+    Test->>Browser: Click Login
+    
+    Browser->>MerchantPortal: POST /api/merchant/login
+    MerchantPortal-->>Browser: Authentication Response
+    
+    alt Login Successful
+        Browser-->>Test: Dashboard Loaded
+        Test->>Browser: Navigate to Dashboard
+        Test->>Test: Verify Merchant Data
+        Test->>Browser: Check Available Features
+        Test->>Test: Verify Merchant Reports
+    else Login Failed
+        Browser-->>Test: Error Message
+        Test->>Test: Verify Error Handling
+    end
+```
+
+## 📊 Test Execution Sequence
+
+```mermaid
+graph LR
+    A[Start] --> B[Setup Test Environment]
+    B --> C[Login User]
+    C --> D{Test Category}
+    D -->|Payment| E[Execute Payment Tests]
+    D -->|Profile| F[Execute Profile Tests]
+    D -->|Merchant| G[Execute Merchant Tests]
+    E --> H[Capture Results]
+    F --> H
+    G --> H
+    H --> I[Generate Report]
+    I --> J[Cleanup]
+    J --> K[End]
+```
+
+## 📋 Test Data Flow
+
+```mermaid
+graph TB
+    A[testData.ts] --> B{Data Type}
+    B -->|Login Credentials| C[User Email & Password]
+    B -->|Payment Data| D[Recipient Info, Amounts]
+    B -->|Profile Data| E[MPIN, Password Details]
+    B -->|URLs| F[Base URL, Endpoints]
+    
+    C --> G[Use in Login Tests]
+    D --> H[Use in Payment Tests]
+    E --> I[Use in Profile Tests]
+    F --> J[Configure Test Environment]
+    
+    G --> K[Test Execution]
+    H --> K
+    I --> K
+    J --> K
+    K --> L[Generate Results]
+```
         LM2 --> LM3[Create Labesh Entry]
         LM3 --> LM4[Submit for Verification]
     end

@@ -51,6 +51,25 @@ This project provides comprehensive automated test coverage for the LKS AXIAN pl
 ├── scripts/                    # Utility scripts
 ├── playwright.config.ts        # Playwright configuration
 ├── package.json                # Project dependencies
+├── FLOW_DIAGRAM.md            # Test flow diagrams
+└── playwright-report/          # Test reports (generated)
+```
+
+## 📊 Test Flow Diagrams
+
+For detailed test execution flows, process diagrams, and workflow visualizations, see [FLOW_DIAGRAM.md](FLOW_DIAGRAM.md).
+
+Includes diagrams for:
+- Overall test execution flow
+- Login and authentication process
+- Payment processing flows (Bank Transfer, Bill Payment, Cashout, Send Money)
+- Scheduled payments (Wallet-to-Bank, Wallet-to-Wallet)
+- Profile management flows (Change MPIN, Change Password)
+- Merchant portal operations
+- Test data flow
+├── scripts/                    # Utility scripts
+├── playwright.config.ts        # Playwright configuration
+├── package.json                # Project dependencies
 └── playwright-report/          # Test reports (generated)
 ```
 
