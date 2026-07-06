@@ -1,78 +1,71 @@
-# AXIAN Automation Testing Framework
+# LKS AXIAN Automation Testing Framework
 
-A comprehensive Playwright-based automation testing framework for MMP (Mobile Money Platform) web application testing.
+Automated testing framework for LKS AXIAN platform using Playwright and TypeScript.
 
-## 📋 Project Overview
+## 📋 Overview
 
-This automation testing framework is built with:
-- **Playwright**: For end-to-end testing
-- **TypeScript**: For type-safe test development
-- **Allure**: For test reporting and visualization
-- **ExcelJS**: For data-driven testing with Excel files
+This project provides comprehensive automated test coverage for the LKS AXIAN platform, including:
+- User authentication and login flows
+- Payment processing (bank transfers, bill payments, cashouts)
+- Money transfer operations
+- Wallet-to-bank and wallet-to-wallet scheduled payments
+- User profile management (password & MPIN changes)
 
 ## 🚀 Features
 
-- **Multi-role testing**: Admin Maker, Admin Checker, Labesh Maker, Labesh Checker workflows
-- **Comprehensive test coverage**: Login, Aggregator management, Role management, Configuration, Bulk onboarding, Reports
-- **Data-driven testing**: Excel-based test data management
-- **Detailed reporting**: Allure reports with screenshots, videos, and traces
-- **Parallel execution**: Configurable test execution
-- **Environment configuration**: Support for multiple environments via .env files
+- **Page Object Model**: Organized page objects for maintainable test code
+- **TypeScript Support**: Full TypeScript support for type safety
+- **Playwright Framework**: Modern browser automation
+- **Test Organization**: Tests organized by feature/module
+- **Test Data Management**: Centralized test data configuration
+- **GitHub Actions**: CI/CD integration with Playwright workflows
 
 ## 📁 Project Structure
 
 ```
-AXIAN_AUTOMATION_TESTING/
-├── tests/                    # Test specifications
-│   └── mmp/                 # MMP-specific tests
-│       ├── login.spec.ts
-│       ├── aggregatorE2E.spec.ts
-│       ├── aggregatorNegative.spec.ts
-│       ├── aggregatorUpdate.spec.ts
-│       ├── roleCreation.spec.ts
-│       ├── config.spec.ts
-│       ├── bulkOnboarding.spec.ts
-│       ├── changePassword.spec.ts
-│       ├── reports.spec.ts
-│       ├── adminMaker/      # Admin Maker role tests
-│       ├── adminChecker/    # Admin Checker role tests
-│       ├── labeshMaker/     # Labesh Maker role tests
-│       └── labeshChecker/   # Labesh Checker role tests
-├── pages/                   # Page Object Models
-│   └── mmp/                # MMP page objects
-├── utils/                   # Utility functions
-│   ├── generateLoginReport.ts
-│   ├── generateAggregatorReport.ts
-│   ├── generateAggregatorUpdateReport.ts
-│   ├── generateConfigReport.ts
-│   ├── generateChangePasswordReport.ts
-│   ├── generateBulkOnboardingReport.ts
-│   └── generateMasterReport.ts
-├── test-data/              # Test data files (Excel, JSON)
-├── test-results/           # Test execution results
-├── allure-results/         # Allure test results
-├── allure-report/          # Generated Allure reports
-├── playwright-report/      # Playwright HTML reports
-├── reports/                # Custom reports
-├── .env                    # Environment variables
-├── playwright.config.ts    # Playwright configuration
-├── package.json           # Dependencies and scripts
-└── tsconfig.json          # TypeScript configuration
+├── pages/                      # Page object models
+│   ├── LoginPage.ts
+│   ├── BankTransferPage.ts
+│   ├── BillPaymentPage.ts
+│   ├── CashoutPage.ts
+│   ├── SendMoneyPage.ts
+│   ├── SchedulePaymentPage.ts
+│   ├── ChangeMpinPage.ts
+│   └── ChangePasswordPage.ts
+├── tests/                      # Test specifications
+│   ├── payments/
+│   │   ├── bank-transfer.spec.ts
+│   │   ├── bill-payment.spec.ts
+│   │   ├── cashout.spec.ts
+│   │   ├── schedule-wallet-to-bank.spec.ts
+│   │   ├── schedule-wallet-to-wallet.spec.ts
+│   │   └── send-money.spec.ts
+│   ├── profile/
+│   │   ├── change-mpin.spec.ts
+│   │   └── change-password.spec.ts
+│   ├── example.spec.ts
+│   └── merchant-portal.spec.ts
+├── data/                       # Test data
+│   └── testData.ts
+├── test-cases/                 # Test case documents
+├── scripts/                    # Utility scripts
+├── playwright.config.ts        # Playwright configuration
+├── package.json                # Project dependencies
+└── playwright-report/          # Test reports (generated)
 ```
 
-## 🛠️ Setup Instructions
+## 🛠️ Installation
 
 ### Prerequisites
 - Node.js (v16 or higher)
 - npm or yarn
-- Git
 
-### Installation
+### Setup
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd AXIAN_AUTOMATION_TESTING
+git clone https://github.com/rabbiyamehmood/LKS_AXIAN_AUTOMATION.git
+cd LKS_AXIAN_AUTOMATION
 ```
 
 2. Install dependencies:
@@ -85,65 +78,95 @@ npm install
 npx playwright install
 ```
 
-4. Configure environment variables:
-```bash
-cp .env.example .env
-# Edit .env file with your configuration
-```
-
-### Environment Variables
-Create a `.env` file with the following variables:
-```env
-MMP_BASE_URL=https://mixxmmp-test.tigo.co.tz
-MMP_USERNAME=your_username
-MMP_PASSWORD=your_password
-# Add other environment-specific variables
-```
-
 ## 🧪 Running Tests
 
-### Individual Test Suites
+### Run all tests:
 ```bash
-# Run login tests
-npm run test:login
-
-# Run aggregator tests
-npm run test:aggregator
-
-# Run role creation tests
-npm run test:roleAll
-
-# Run configuration tests
-npm run test:configAll
-
-# Run bulk onboarding tests
-npm run test:bulkAll
-
-# Run reports tests
-npm run test:reports
-
-# Run change password tests
-npm run test:changePassword
+npm test
 ```
 
-### Run All Tests
+### Run tests in a specific directory:
 ```bash
-npm run test:all
+npm test -- tests/payments/
 ```
 
-### Run with UI Mode
+### Run a specific test file:
 ```bash
-npm run test:ui
+npm test -- tests/payments/bank-transfer.spec.ts
 ```
 
-### Run with Headed Browser
+### Run tests in headed mode (see browser):
 ```bash
-npm run test:headed
+npm test -- --headed
 ```
 
-## 📊 Generating Reports
+### Run tests in debug mode:
+```bash
+npm test -- --debug
+```
 
-### Allure Reports
+### Generate HTML report:
+```bash
+npx playwright show-report
+```
+
+## 📊 Test Categories
+
+### Payment Tests
+- **Bank Transfer**: Tests for bank transfer functionality
+- **Bill Payment**: Tests for bill payment processes
+- **Cashout**: Tests for cash withdrawal operations
+- **Send Money**: Tests for money transfer between users
+- **Schedule Payments**: Tests for scheduled wallet-to-bank and wallet-to-wallet payments
+
+### Profile Tests
+- **Change MPIN**: Tests for MPIN modification
+- **Change Password**: Tests for password modification
+
+## 🔧 Configuration
+
+Edit `playwright.config.ts` to customize:
+- Browser launch options
+- Test timeout settings
+- Report generation
+- Parallelization settings
+
+Edit `data/testData.ts` for test credentials and test data.
+
+## 📝 Writing Tests
+
+Tests follow the Page Object Model pattern. Example:
+
+```typescript
+import { test, expect } from '@playwright/test';
+import { LoginPage } from '../pages/LoginPage';
+
+test('User login success', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  await loginPage.navigate();
+  await loginPage.login('user@example.com', 'password');
+  // Add assertions
+});
+```
+
+## 🤝 Contributing
+
+1. Create a new branch for your feature
+2. Write tests following the Page Object Model
+3. Ensure all tests pass
+4. Submit a pull request
+
+## 📞 Support
+
+For issues or questions, please create an issue in the repository.
+
+## 📄 License
+
+This project is proprietary and confidential.
+
+---
+
+**Last Updated**: 2026-07-06
 ```bash
 # Generate Allure report
 npm run allure:generate
