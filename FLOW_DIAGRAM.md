@@ -1,237 +1,267 @@
-# LKS AXIAN Automation Testing Framework - Test Flow Diagram
+# LKS AXIAN Automation Testing Framework - Portal Flow Diagram
 
-## 🎯 Overall Test Execution Flow
+## 🎯 LKS Portal Test Execution Flow
 
 ```mermaid
 flowchart TD
-    A[Start Test Execution] --> B[Environment Setup]
-    B --> C[Load Configuration]
-    C --> D[Initialize Playwright]
-    D --> E[Load Test Data]
-    E --> F{Select Test Suite}
+    A[Start Test Suite] --> B[Login to LKS Portal]
+    B --> C{User Access Level}
     
-    F --> G[Authentication Tests]
-    F --> H[Payment Tests]
-    F --> I[Profile Management Tests]
-    F --> J[Merchant Portal Tests]
+    C -->|Admin| D[Admin Dashboard]
+    C -->|Merchant| E[Merchant Dashboard]
     
-    G --> K{Login Status}
-    K -->|Success| K1[Proceed to Payments]
-    K -->|Failed| K2[Verify Error Handling]
+    D --> F{Portal Module}
     
-    H --> L[Execute Payment Flows]
-    I --> M[Execute Profile Updates]
-    J --> N[Execute Merchant Tests]
+    F --> G[Dashboard]
+    F --> H[Incoming]
+    F --> I[Handler Management]
+    F --> J[Terminal Management]
+    F --> K[Outgoing]
+    F --> L[Transactions History]
+    F --> M[Merchant Hierarchy]
+    F --> N[Settings]
     
-    K1 --> O[Execute Tests]
-    K2 --> O
-    L --> O
-    M --> O
-    N --> O
+    G --> O[Verify Dashboard Data]
+    H --> P[Test Incoming Transactions]
+    I --> Q[Test Handler Operations]
+    J --> R[Test Terminal Operations]
+    K --> S[Test Outgoing Transactions]
+    L --> T[Test Transaction Filters]
+    M --> U[Test Merchant Management]
+    N --> V[Test Configuration Settings]
     
-    O --> P[Capture Results & Screenshots]
-    P --> Q[Generate HTML Report]
-    Q --> R[Cleanup & Close Browsers]
-    R --> S[End Test Execution]
+    O --> W[Generate Reports]
+    P --> W
+    Q --> W
+    R --> W
+    S --> W
+    T --> W
+    U --> W
+    V --> W
+    
+    W --> X[Allure Reporting]
+    X --> Y[Test Completion]
 ```
 
-## 🔐 Login & Authentication Flow
+## 🔐 Portal Login Flow
 
 ```mermaid
 sequenceDiagram
     participant Test as Test Runner
     participant Browser as Playwright Browser
-    participant Server as LKS Server
+    participant LKSServer as LKS Server
     
-    Test->>Browser: Navigate to Login Page
-    Browser->>Server: GET /login
-    Server-->>Browser: Login Page HTML
-    Browser-->>Test: Page Loaded
+    Test->>Browser: Navigate to LKS Portal
+    Browser->>LKSServer: GET /portal/login
+    LKSServer-->>Browser: Login Page HTML
+    Browser-->>Test: Login Page Loaded
     
-    Test->>Browser: Enter Email/Username
-    Test->>Browser: Enter Password
+    Test->>Browser: Enter Admin Credentials
     Test->>Browser: Click Login Button
     
-    Browser->>Server: POST /api/login (credentials)
-    Server-->>Browser: Authentication Response
+    Browser->>LKSServer: POST /api/auth/login
+    LKSServer-->>Browser: Authentication Response
     
     alt Login Successful
-        Browser-->>Test: Dashboard Redirected
-        Test->>Test: Verify Dashboard Elements
-        Test->>Test: Store Authentication Token
+        Browser-->>Test: Redirected to Dashboard
+        Test->>Test: Verify Admin Access
+        Test->>Test: Store Session Token
     else Login Failed
         Browser-->>Test: Error Message Displayed
-        Test->>Test: Verify Error Message
-        Test->>Test: Verify Retry Option
-    end
-```
-
-## 💳 Payment Processing Flow
-
-```mermaid
-graph TB
-    subgraph "Bank Transfer"
-        BT1[User Login] --> BT2[Navigate to Send Money]
-        BT2 --> BT3[Select Bank Transfer]
-        BT3 --> BT4[Fill Bank Details]
-        BT4 --> BT5[Enter Amount]
-        BT5 --> BT6[Review Transfer Details]
-        BT6 --> BT7[Confirm Transaction]
-        BT7 --> BT8{Success?}
-        BT8 -->|Yes| BT9[Verify Success Message]
-        BT8 -->|No| BT10[Verify Error Handling]
-    end
-    
-    subgraph "Bill Payment"
-        BP1[User Login] --> BP2[Navigate to Bill Payment]
-        BP2 --> BP3[Select Biller]
-        BP3 --> BP4[Select Bill Type]
-        BP4 --> BP5[Enter Bill Number]
-        BP5 --> BP6[Enter Amount]
-        BP6 --> BP7[Review Payment Details]
-        BP7 --> BP8[Confirm Payment]
-        BP8 --> BP9{Success?}
-        BP9 -->|Yes| BP10[Verify Receipt]
-        BP9 -->|No| BP11[Verify Error Message]
-    end
-    
-    subgraph "Cash Out"
-        CO1[User Login] --> CO2[Navigate to Cashout]
-        CO2 --> CO3[Select Cash Out Option]
-        CO3 --> CO4[Enter Amount]
-        CO4 --> CO5[Review Charges]
-        CO5 --> CO6[Confirm Cashout]
-        CO6 --> CO7{Success?}
-        CO7 -->|Yes| CO8[Verify Confirmation]
-        CO7 -->|No| CO9[Verify Error Handling]
-    end
-    
-    subgraph "Send Money"
-        SM1[User Login] --> SM2[Navigate to Send Money]
-        SM2 --> SM3[Select Recipient]
-        SM3 --> SM4[Enter Amount]
-        SM4 --> SM5[Review Transfer Details]
-        SM5 --> SM6[Confirm Transfer]
-        SM6 --> SM7{Success?}
-        SM7 -->|Yes| SM8[Verify Transaction ID]
-        SM7 -->|No| SM9[Verify Error Message]
-    end
-    
-    subgraph "Scheduled Payments"
-        SP1[User Login] --> SP2[Navigate to Schedule Payment]
-        SP2 --> SP3{Payment Type?}
-        SP3 -->|Wallet to Bank| SP4[Select Bank Account]
-        SP3 -->|Wallet to Wallet| SP5[Select Recipient]
-        SP4 --> SP6[Enter Amount & Date]
-        SP5 --> SP6
-        SP6 --> SP7[Review Schedule Details]
-        SP7 --> SP8[Confirm Schedule]
-        SP8 --> SP9{Success?}
-        SP9 -->|Yes| SP10[Verify Schedule Created]
-        SP9 -->|No| SP11[Verify Error Handling]
-    end
-```
-
-## 👤 Profile Management Flow
-
-```mermaid
-graph TB
-    subgraph "Change MPIN"
-        CP1[User Login] --> CP2[Navigate to Profile Settings]
-        CP2 --> CP3[Select Change MPIN]
-        CP3 --> CP4[Enter Current MPIN]
-        CP4 --> CP5[Enter New MPIN]
-        CP5 --> CP6[Confirm New MPIN]
-        CP6 --> CP7{Validation}
-        CP7 -->|Pass| CP8[Confirm Change]
-        CP7 -->|Fail| CP9[Show Error Message]
-        CP8 --> CP10[Verify Success Message]
-        CP9 --> CP11[Verify Error Details]
-    end
-    
-    subgraph "Change Password"
-        PW1[User Login] --> PW2[Navigate to Profile Settings]
-        PW2 --> PW3[Select Change Password]
-        PW3 --> PW4[Enter Current Password]
-        PW4 --> PW5[Enter New Password]
-        PW5 --> PW6[Confirm New Password]
-        PW6 --> PW7{Validation}
-        PW7 -->|Pass| PW8[Confirm Change]
-        PW7 -->|Fail| PW9[Show Error Message]
-        PW8 --> PW10[Verify Success Message]
-        PW9 --> PW11[Verify Error Details]
-    end
-```
-
-## 🏪 Merchant Portal Flow
-
-```mermaid
-sequenceDiagram
-    participant Test as Test Runner
-    participant Browser as Playwright Browser
-    participant MerchantPortal as Merchant Portal Server
-    
-    Test->>Browser: Navigate to Merchant Portal
-    Browser->>MerchantPortal: GET /merchant
-    MerchantPortal-->>Browser: Portal Page
-    Browser-->>Test: Page Loaded
-    
-    Test->>Browser: Enter Merchant Credentials
-    Test->>Browser: Click Login
-    
-    Browser->>MerchantPortal: POST /api/merchant/login
-    MerchantPortal-->>Browser: Authentication Response
-    
-    alt Login Successful
-        Browser-->>Test: Dashboard Loaded
-        Test->>Browser: Navigate to Dashboard
-        Test->>Test: Verify Merchant Data
-        Test->>Browser: Check Available Features
-        Test->>Test: Verify Merchant Reports
-    else Login Failed
-        Browser-->>Test: Error Message
         Test->>Test: Verify Error Handling
     end
 ```
 
-## 📊 Test Execution Sequence
-
-```mermaid
-graph LR
-    A[Start] --> B[Setup Test Environment]
-    B --> C[Login User]
-    C --> D{Test Category}
-    D -->|Payment| E[Execute Payment Tests]
-    D -->|Profile| F[Execute Profile Tests]
-    D -->|Merchant| G[Execute Merchant Tests]
-    E --> H[Capture Results]
-    F --> H
-    G --> H
-    H --> I[Generate Report]
-    I --> J[Cleanup]
-    J --> K[End]
-```
-
-## 📋 Test Data Flow
+## 📊 Portal Navigation Flows
 
 ```mermaid
 graph TB
-    A[testData.ts] --> B{Data Type}
-    B -->|Login Credentials| C[User Email & Password]
-    B -->|Payment Data| D[Recipient Info, Amounts]
-    B -->|Profile Data| E[MPIN, Password Details]
-    B -->|URLs| F[Base URL, Endpoints]
+    subgraph "Dashboard Module"
+        D1[Navigate to Dashboard] --> D2[Load Dashboard Widgets]
+        D2 --> D3[Display Key Metrics]
+        D3 --> D4[Verify Data Accuracy]
+        D4 --> D5[Test Export Functionality]
+    end
     
-    C --> G[Use in Login Tests]
-    D --> H[Use in Payment Tests]
-    E --> I[Use in Profile Tests]
-    F --> J[Configure Test Environment]
+    subgraph "Incoming Module"
+        I1[Navigate to Incoming] --> I2[Load Incoming Transactions]
+        I2 --> I3[Apply Filters]
+        I3 --> I4[Search Transactions]
+        I4 --> I5[View Transaction Details]
+        I5 --> I6[Verify Transaction Status]
+    end
     
-    G --> K[Test Execution]
-    H --> K
-    I --> K
-    J --> K
-    K --> L[Generate Results]
+    subgraph "Handler Management"
+        HM1[Navigate to Handler Management] --> HM2[View Active Handlers]
+        HM2 --> HM3[Create New Handler]
+        HM3 --> HM4[Fill Handler Details]
+        HM4 --> HM5[Assign Permissions]
+        HM5 --> HM6[Verify Handler Created]
+        HM2 --> HM7[Edit Existing Handler]
+        HM7 --> HM8[Update Details]
+        HM8 --> HM9[Verify Changes]
+    end
+    
+    subgraph "Terminal Management"
+        TM1[Navigate to Terminal Management] --> TM2[View Active Terminals]
+        TM2 --> TM3[Register New Terminal]
+        TM3 --> TM4[Enter Terminal Details]
+        TM4 --> TM5[Assign to Handler]
+        TM5 --> TM6[Verify Terminal Status]
+        TM2 --> TM7[Manage Terminal Settings]
+        TM7 --> TM8[Update Configuration]
+        TM8 --> TM9[Verify Settings Applied]
+    end
+    
+    subgraph "Outgoing Module"
+        O1[Navigate to Outgoing] --> O2[Load Outgoing Transactions]
+        O2 --> O3[Apply Filters]
+        O3 --> O4[Search Transactions]
+        O4 --> O5[View Transaction Details]
+        O5 --> O6[Verify Transaction Status]
+    end
+    
+    subgraph "Transactions History"
+        TH1[Navigate to Transactions History] --> TH2[Load All Transactions]
+        TH2 --> TH3[Apply Date Range Filter]
+        TH3 --> TH4[Search by Reference]
+        TH4 --> TH5[View Transaction Details]
+        TH5 --> TH6[Export Transaction Report]
+    end
+    
+    subgraph "Merchant Hierarchy"
+        MH1[Navigate to Merchant Hierarchy] --> MH2[View Merchant Tree]
+        MH2 --> MH3[View Merchant Details]
+        MH3 --> MH4{Action}
+        MH4 -->|Create| MH5[Create New Merchant]
+        MH4 -->|Edit| MH6[Edit Merchant Info]
+        MH4 -->|Approve| MH7[Approve Pending Merchant]
+        MH5 --> MH8[Fill Merchant Details]
+        MH8 --> MH9[Verify Merchant Created]
+    end
+    
+    subgraph "Settings Module"
+        S1[Navigate to Settings] --> S2{Settings Type}
+        S2 -->|General| S3[Update General Settings]
+        S2 -->|Security| S4[Configure Security Settings]
+        S2 -->|Notification| S5[Setup Notifications]
+        S3 --> S6[Save Configuration]
+        S4 --> S6
+        S5 --> S6
+        S6 --> S7[Verify Settings Applied]
+    end
+```
+
+## 🔄 Handler Management Flow
+
+```mermaid
+graph LR
+    A[Start] --> B[Navigate Handler Management]
+    B --> C{Operation}
+    C -->|Create| D[Fill Handler Form]
+    C -->|Edit| E[Load Handler Details]
+    C -->|Delete| F[Confirm Deletion]
+    
+    D --> G[Set Handler Name]
+    G --> H[Assign Permissions]
+    H --> I[Set Status]
+    I --> J[Save Handler]
+    
+    E --> K[Update Handler Info]
+    K --> J
+    
+    F --> L[Verify Handler Deleted]
+    J --> M[Verify in List]
+    L --> M
+    M --> N[End]
+```
+
+## 💳 Terminal Management Flow
+
+```mermaid
+graph LR
+    A[Start] --> B[Navigate Terminal Management]
+    B --> C{Operation}
+    C -->|Register| D[Fill Terminal Form]
+    C -->|Configure| E[Load Terminal Settings]
+    C -->|Monitor| F[View Terminal Status]
+    
+    D --> G[Enter Terminal ID]
+    G --> H[Assign Handler]
+    H --> I[Set Terminal Type]
+    I --> J[Configure Settings]
+    J --> K[Save Terminal]
+    
+    E --> L[Update Configuration]
+    L --> K
+    
+    F --> M[Check Terminal Status]
+    M --> N[View Last Transaction]
+    N --> O[Verify Terminal Health]
+    K --> P[Verify in List]
+    O --> P
+    P --> Q[End]
+```
+
+## 📈 Transactions Processing Flow
+
+```mermaid
+graph TB
+    subgraph "Incoming Process"
+        II[Incoming Transaction Arrives] --> IP1[System Receives]
+        IP1 --> IP2[Validate Transaction]
+        IP2 --> IP3{Valid?}
+        IP3 -->|Yes| IP4[Store in Database]
+        IP3 -->|No| IP5[Mark as Failed]
+        IP4 --> IP6[Update Dashboard]
+        IP5 --> IP6
+        IP6 --> IP7[Display in Portal]
+    end
+    
+    subgraph "Outgoing Process"
+        OO[Create Outgoing Request] --> OP1[Validate Details]
+        OP1 --> OP2{Valid?}
+        OP2 -->|Yes| OP3[Queue for Processing]
+        OP2 -->|No| OP4[Show Error]
+        OP3 --> OP5[Send to Handler]
+        OP5 --> OP6[Track Status]
+        OP4 --> OP7[Allow Retry]
+        OP6 --> OP8[Update Portal]
+    end
+```
+
+## 📋 Test Data & Configuration Flow
+
+```mermaid
+graph TB
+    A[Load Test Configuration] --> B{Configuration Type}
+    B -->|Portal URLs| C[Set Base URL]
+    B -->|Credentials| D[Load Admin Credentials]
+    B -->|Test Data| E[Load Merchant/Handler/Terminal Data]
+    
+    C --> F[Configure Environment]
+    D --> F
+    E --> F
+    
+    F --> G[Initialize Playwright]
+    G --> H[Start Test Execution]
+    H --> I{Test Category}
+    
+    I -->|Dashboard Tests| J[Dashboard Validation]
+    I -->|Handler Tests| K[Handler CRUD Operations]
+    I -->|Terminal Tests| L[Terminal Management]
+    I -->|Transaction Tests| M[Transaction Processing]
+    I -->|Merchant Tests| N[Merchant Operations]
+    I -->|Settings Tests| O[Configuration Management]
+    
+    J --> P[Capture Results]
+    K --> P
+    L --> P
+    M --> P
+    N --> P
+    O --> P
+    
+    P --> Q[Generate Test Report]
 ```
         LM2 --> LM3[Create Labesh Entry]
         LM3 --> LM4[Submit for Verification]
